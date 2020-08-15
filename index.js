@@ -23,7 +23,7 @@ app.post('/transactions',auth, (req, res) => {
     )
 }); 
 
-app.get('/price/:key', auth, (req,res) =>{
+app.get('/price/:key', (req,res) =>{
 //Creates a transaction gets the conversion price for a crypto currency.
     criptoController.getDefiPrices(req.params.key).then(
       (response) => {
