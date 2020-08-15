@@ -34,7 +34,7 @@ app.get('/price/:key', auth, (req,res) =>{
 
 
 if (!module.parent) {
-  const server = app.listen(8080, () => {
+  const server = app.listen(process.env.PORT || 8080, () => {
     const { port } = server.address();
     console.log('Example app listening at http://localhost:%s', port);
   });
