@@ -1,9 +1,9 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('../config/firebase/alas-ec935-firebase-adminsdk-ud7x2-ed256a3669.json')
+const { googleKey } = require('../config/config')
 
 const initializeApp = () => {
     const credentials = {
-        credential: admin.credential.cert(serviceAccount),
+        credential: admin.credential.cert(googleKey),
         databaseUrl: "https://alas-ec935.firebaseio.com"
     }
     admin.initializeApp(credentials)

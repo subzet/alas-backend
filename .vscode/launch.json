@@ -6,18 +6,14 @@
     "configurations": [
 
 
+
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/functions/app/services/cryptoPrices.js"
-        },        
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Debug",
-            "port": 9229
-          }
+            "runtimeVersion": "12.18.2",
+            "program": "${workspaceFolder}/index.js"
+        }
         
     ]
 }

@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const { initializeApp , initializeDB } = require('./app/utils/firebase');
-const criptoController = require('./app/controllers/criptoController')
+const criptoController = require('./app/controllers/criptoController');
+const transactionController = require('./app/controllers/transactionController');
 const auth = require('./app/middleware/auth');
 
 initializeApp();
@@ -16,18 +17,22 @@ app.get('/ping', (req, res) => {
 });
 
 app.post('/transactions',auth, (req, res) => {
-    res.status(200).send("Authorized!")
-  });
-
-app.get('/price/:key', auth, (req,res) =>{
-    criptoController.getDefiPrices(req.params.key).then(
-      response => {
+//Creates a transaction.
+    transactionController.createTransaction(req.body).then(
+      (response) => {
         res.status(response.code).send(response);
       }
-    ).catch(
-        res.status(500).send({})
-    );
-})
+    )
+}); 
+
+app.get('/price/:key', auth, (req,res) =>{
+//Creates a transaction gets the conversion price for a crypto currency.
+    criptoController.getDefiPrices(req.params.key).then(
+      (response) => {
+        res.status(response.code).send(response);
+      }
+    )
+});
 
 
 if (!module.parent) {
