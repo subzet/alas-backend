@@ -1,14 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { initializeApp , initializeDB } = require('./app/utils/firebase');
+const { initializeApp  } = require('./app/utils/firebase');
 const criptoController = require('./app/controllers/criptoController');
 const transactionController = require('./app/controllers/transactionController');
 const auth = require('./app/middleware/auth');
 
 initializeApp();
-
-const db = initializeDB();
 
 app.use(cors({ origin: true }));
 
