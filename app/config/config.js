@@ -13,5 +13,13 @@ const googleKey = {
     client_x509_cert_url:process.env.CLIENT_X509_CERT_URL
 }
 
+const validTransactions = {
+    'money-transfer':'Recepción de dinero.',
+    'money-sent':'Envio de dinero.',
+    'bank-transfer':'Depósito de dinero.',
+    'payment':'Pago',
+    'investment':'Inversión'
+}
 
-module.exports = { googleKey }
+
+module.exports = { googleKey, validTransactions }

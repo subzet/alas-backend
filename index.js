@@ -10,6 +10,7 @@ const auth = require('./app/middleware/auth');
 initializeApp();
 
 app.use(cors({ origin: true }));
+app.use(express.json());
 
 app.get('/ping', (req, res) => {
   return res.status(200).send('pong');
