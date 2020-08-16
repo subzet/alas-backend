@@ -5,6 +5,7 @@ const { initializeApp  } = require('./app/utils/firebase');
 const criptoController = require('./app/controllers/criptoController');
 const transactionController = require('./app/controllers/transactionController');
 const walletController = require('./app/controllers/walletController')
+const userController = require('./app/controllers/userController')
 const auth = require('./app/middleware/auth');
 
 initializeApp();
@@ -44,13 +45,22 @@ app.get('/wallet',auth, (req,res) => {
   )
 })
 
-app.get('/price/:key', (req,res) =>{
+app.get('/price/:key',auth, (req,res) =>{
 //Creates a transaction gets the conversion price for a crypto currency.
     criptoController.getDefiPrices(req.params.key).then(
       (response) => {
         res.status(response.code).send(response);
       }
     )
+});
+
+app.get('/users/mainScreen',auth,(req,res) => {
+  //Get's user balance and transactions.
+  userController.getMainScreenData(req.uid).then(
+    (response) => {
+      res.status(response.code).send(response);
+  }
+)
 });
 
 if (!module.parent) {

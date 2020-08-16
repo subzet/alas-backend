@@ -59,12 +59,28 @@ async function storeTransaction(uid, transaction){
 }
 
 async function getBalance(uid){
-
+    return (await admin.firestore().collection('balance').doc(uid).get()).data()
 }
 
 async function getTransactions(uid){
+    console.log('Retrieving transactions...')
+    let result = []
+    let snapshot = (await admin.firestore().collection('transactions').where('uid','==',uid).get())
+    if(snapshot.empty){
+        return []
+    }
+    
+    snapshot.forEach(snapshot => {
+        let data = snapshot.data()
+        delete data['uid']
+        result.push(data)
+    })
 
+    return result
 }
 
 
 exports.createTransaction = createTransaction;
+exports.getBalance = getBalance;
+exports.getTransactions = getTransactions;
+exports.transaction = getTransactions;
