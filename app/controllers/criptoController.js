@@ -39,3 +39,4 @@ async function getDefiRates(){
 }
 
 exports.getDefiPrices = getDefiPrices;
+exports.getDefiRates = getDefiRates;
