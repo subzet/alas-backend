@@ -76,8 +76,13 @@ async function getTransactions(uid){
         result.push(data)
     })
 
+    result.sort((a,b) => {
+        return Date.parse(b.timestamp) - Date.parse(a.timestamp)
+    })
+
     return result
 }
+
 
 
 exports.createTransaction = createTransaction;
