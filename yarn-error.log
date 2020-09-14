@@ -1,0 +1,56 @@
+Arguments: 
+  /Users/mponsa/.nvm/versions/node/v12.18.2/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js add expo-server-sdk
+
+PATH: 
+  /Users/mponsa/.nvm/versions/node/v12.18.2/bin:/Users/mponsa/Library/Python/TU-VERSION-DE-PYTHON/bin:/Users/mponsa/.nvm/versions/node/v8.9.1/bin:/Users/mponsa/Library/Python/3.7/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/mponsa/Library/Python/2.7/bin:/Users/mponsa/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Redis.app/Contents/Resources/Vendor/redis/bin/redis-cli:/usr/local/go/bin:/Library/Apple/usr/bin:/Users/mponsa/Library/Python/TU-VERSION-DE-PYTHON/bin:/Users/mponsa/.sdkman/candidates/java/current/bin:/Users/mponsa/.sdkman/candidates/groovy/current/bin:/Users/mponsa/.sdkman/candidates/grails/current/bin:/Users/mponsa/.nvm/versions/node/v8.9.1/bin:/Users/mponsa/Library/Python/3.7/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/mponsa/Library/Python/2.7/bin:/Users/mponsa/bin:/Users/mponsa/go/bin:/Users/mponsa/.rvm/bin:/usr/local/go/bin:/Users/mponsa/go/bin:/Users/mponsa/.sdkman/candidates/grails/current/bin
+
+Yarn version: 
+  1.22.4
+
+Node version: 
+  12.18.2
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: http://registry.npm.ml.com/axios: ETIMEDOUT
+      at Timeout._onTimeout (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141408:19)
+      at listOnTimeout (internal/timers.js:549:17)
+      at processTimers (internal/timers.js:492:7)
+
+npm manifest: 
+  {
+    "name": "functions",
+    "description": "Cloud Functions for Firebase",
+    "scripts": {
+      "start": "node ./index.js",
+      "lint": "npm run lint:js",
+      "lint:js": "eslint index.js src/** --fix"
+    },
+    "engines": {
+      "node": "12"
+    },
+    "main": "index.js",
+    "dependencies": {
+      "axios": "^0.19.2",
+      "cheerio": "^1.0.0-rc.3",
+      "cors": "^2.8.5",
+      "dotenv": "^8.2.0",
+      "express": "^4.17.1",
+      "firebase-admin": "^8.10.0",
+      "moment": "^2.27.0"
+    },
+    "devDependencies": {
+      "eslint": "^5.12.0",
+      "eslint-plugin-promise": "^4.0.1",
+      "firebase-functions-test": "^0.2.0"
+    },
+    "private": true
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
