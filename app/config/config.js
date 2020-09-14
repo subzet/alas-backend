@@ -21,5 +21,7 @@ const validTransactions = {
     'investment':'Inversión'
 }
 
+const sendNotificationTransaction = ['bank-transfer','money-transfer']
 
-module.exports = { googleKey, validTransactions }
+
+module.exports = { googleKey, validTransactions, sendNotificationTransaction }

@@ -1,6 +1,8 @@
 const moment = require('moment')
-const { validTransactions } = require('../config/config')
+const { validTransactions, sendNotificationTransaction } = require('../config/config')
+const { sendNotification, buildNotification } = require('./notificationController')
 const admin = require('firebase-admin');
+ 
 
 async function createTransaction(uid,body){
     let transaction = {}
@@ -15,6 +17,16 @@ async function createTransaction(uid,body){
         transaction.uid = uid
 
         await storeTransaction(uid,transaction)
+        
+        if(sendNotificationTransaction.indexOf(transaction.type) >= 0){
+            const notification = buildNotification(
+                buildNotificationTitle(),
+                buildNotificationBody(transaction),
+                transaction
+            )
+            sendNotification(uid,notification)
+        }
+
         console.log(`Succesfully created transaction for user: ${uid}.`)
         return ({msg:`Succesfully created transaction for user: ${uid}.`, code:200})
     }catch(error){
@@ -23,6 +35,15 @@ async function createTransaction(uid,body){
     }
     
 }
+
+const buildNotificationTitle = () => {
+    return "Nueva recepción de dinero"
+}
+
+const buildNotificationBody = trx => {
+    return `Has recibido ${trx.amountLC} ${trx.userLC}`
+}
+
 
 function validateType(type){
     let keys = Object.keys(validTransactions)
@@ -82,6 +103,8 @@ async function getTransactions(uid){
 
     return result
 }
+
+
 
 
 
