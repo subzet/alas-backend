@@ -3,11 +3,8 @@ const { scrapRates } = require('../services/defiRates.js')
 const admin = require('firebase-admin');
 
 
-async function saveDocument(data, collection){
-    const document = data
-    const key =  data.key +'_'+ data.timestamp
-    
-    await admin.firestore().collection(collection).doc(key).set(document)
+async function saveDocument(key, data, collection){
+    await admin.firestore().collection(collection).doc(key).set(data)
 }
 
 
@@ -17,7 +14,8 @@ async function getDefiPrices(key){
         let result;
         
         for(let index = 0; index < data.length; index += 1){
-            await saveDocument(data[index],'cryptos')
+            const docKey =  [data[index].key,data[index].timestamp].join('_')
+            await saveDocument(docKey, data[index],'cryptos')
             if(data[index].key === key){
                 result = data[index]
             }
@@ -40,9 +38,10 @@ async function getDefiRates(){
         const data = await scrapRates()
         
         for(let index = 0; index < data.length; index += 1){
-            await saveDocument(data[index],'defiRates')
+            const key = [data[index].providerName, data[index].timestamp].join('_') 
+            await saveDocument(key, data[index],'defiRates')
         }
-        
+
         return {data, code: 200};
     }catch(error){
         console.log(error.message)

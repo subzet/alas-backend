@@ -26,7 +26,8 @@ async function scrapRates(){
             result.providerName = $(table_rows[i].children[0].children[0]).children('img').attr("alt")
             result.providerImg = $(table_rows[i].children[0].children[0]).children('img').attr("data-src")
             result.actualInterest = Number($(table_rows[i].children[1].children[0]).text().replace('%',''))
-            result.avgInterest = Number($(table_rows[i].children[1].children[0]).text().replace('%',''))
+            result.avgInterest = Number($(table_rows[i].children[2].children[0]).text().replace('%',''))
+            result.timestamp = moment().format();
             providers.push(result)
         }catch(error){
             console.log(error.message)
