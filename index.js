@@ -55,6 +55,16 @@ app.get('/price/:key',auth, (req,res) =>{
     )
 });
 
+
+app.get('/rates', (req,res) =>{
+  //Creates a transaction gets the conversion price for a crypto currency.
+      criptoController.getDefiRates().then(
+        (response) => {
+          res.status(response.code).send(response);
+        }
+      )
+  });
+
 app.get('/users/mainScreen',auth,(req,res) => {
   //Get's user balance and transactions.
   userController.getMainScreenData(req.uid).then(

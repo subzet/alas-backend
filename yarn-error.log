@@ -14,10 +14,8 @@ Platform:
   darwin x64
 
 Trace: 
-  Error: http://registry.npm.ml.com/axios: ETIMEDOUT
-      at Timeout._onTimeout (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:141408:19)
-      at listOnTimeout (internal/timers.js:549:17)
-      at processTimers (internal/timers.js:492:7)
+  Error: read ECONNRESET
+      at TCP.onStreamRead (internal/stream_base_commons.js:205:27)
 
 npm manifest: 
   {
