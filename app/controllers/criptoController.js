@@ -4,8 +4,8 @@ const async = require('async')
 const admin = require('firebase-admin');
 
 
-async function saveDocument(key, data, collection){
-    await admin.firestore().collection(collection).doc(key).set(data)
+async function saveDocument(data, collection){
+    await admin.firestore().collection(collection).doc().set(data)
 }
 
 
@@ -15,8 +15,7 @@ async function getDefiPrices(key){
         let result;
         
         await async.eachLimit(data, 10, async(record) => {
-            const docKey = [record.key,record.timestamp].join('_')
-            await saveDocument(docKey, record,'cryptos')
+            await saveDocument(record,'cryptos')
 
             if(record.key === key){
                 result = record
@@ -40,8 +39,7 @@ async function getDefiRates(){
         const data = await scrapRates()
 
         async.eachLimit(data, 10, async(record) => {
-            const key = [record.providerName, record.timestamp].join('_')
-            await saveDocument(key, record,'defiRates')
+            await saveDocument(record,'defiRates')
         })
 
         return {data, code: 200};

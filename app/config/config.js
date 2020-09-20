@@ -24,7 +24,7 @@ const validTransactions = {
 }
 
 const substractFromBalance = {
-    'money-transfer': false,
+    
     'money-sent':   true,
     'bank-transfer': false,
     'payment': true,

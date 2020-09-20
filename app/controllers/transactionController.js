@@ -100,6 +100,10 @@ async function getTransactions(uid){
     snapshot.forEach(snapshot => {
         let data = snapshot.data()
         delete data['uid']
+
+        //Transform Timestamp
+        data.timestamp = moment(data.timestamp.toDate()).format()
+
         result.push(data)
     })
 
