@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const { initializeApp  } = require('./app/utils/firebase');
 const criptoController = require('./app/controllers/criptoController');
+const investmentController = require('./app/controllers/investmentController');
 const transactionController = require('./app/controllers/transactionController');
 const walletController = require('./app/controllers/walletController')
 const userController = require('./app/controllers/userController')
@@ -65,6 +66,15 @@ app.get('/rates', (req,res) =>{
       )
   });
 
+app.post('/rates/merge', (req,res) =>{
+    //Creates a transaction gets the conversion price for a crypto currency.
+        investmentController.mergeRates().then(
+          (response) => {
+            res.status(response.code).send(response);
+          }
+        )
+  });
+
 app.get('/users/mainScreen',auth,(req,res) => {
   //Get's user balance and transactions.
   userController.getMainScreenData(req.uid).then(
@@ -74,15 +84,28 @@ app.get('/users/mainScreen',auth,(req,res) => {
 )
 });
 
-
-app.post('/notifications/tokens',auth,(req,res) => {
-  //Receives a notification token for a user
-  notificationController.registerToken(req.uid,req.body.expoToken).then(
+app.get('/users/investmentsScreen',auth,(req,res) => {
+  //Get's user balance and transactions.
+  userController.getInvestmentScreenData(req.uid).then(
     (response) => {
-      res.status(response.code).send(response)
-    }
-  )
-})
+      res.status(response.code).send(response);
+  }
+)
+});
+
+
+app.get('/users/investmentsScreen',auth,(req,res) => {
+  //Get's user balance and transactions.
+  userController.getInvestmentScreenData(req.uid).then(
+    (response) => {
+      res.status(response.code).send(response);
+  }
+)
+});
+
+
+
+
 
 if (!module.parent) {
   const server = app.listen(process.env.PORT || 8080, () => {

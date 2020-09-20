@@ -1,7 +1,8 @@
 const cheerio = require('cheerio'),
       axios = require('axios'),
       url = `https://defirate.com/dai/`
-      moment = require('moment');
+      moment = require('moment'),
+      admin = require('firebase-admin');
 
 const DEFI_HTML_TABLE_ROWS = '#table-results > tbody > tr'
       
@@ -23,11 +24,11 @@ async function scrapRates(){
     for(let i = 0; i < table_rows.length; i++){
         try{
             let result = {}
-            result.providerName = $(table_rows[i].children[0].children[0]).children('img').attr("alt")
+            result.providerName = $(table_rows[i].children[0].children[0]).children('img').attr("alt").toLowerCase()
             result.providerImg = $(table_rows[i].children[0].children[0]).children('img').attr("data-src")
             result.actualInterest = Number($(table_rows[i].children[1].children[0]).text().replace('%',''))
             result.avgInterest = Number($(table_rows[i].children[2].children[0]).text().replace('%',''))
-            result.timestamp = moment().format();
+            result.timestamp = admin.firestore.FieldValue.serverTimestamp()
             providers.push(result)
         }catch(error){
             console.log(error.message)

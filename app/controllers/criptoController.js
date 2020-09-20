@@ -1,5 +1,6 @@
 const { scrap } = require('../services/cryptoPrices.js')
 const { scrapRates } = require('../services/defiRates.js')
+const async = require('async')
 const admin = require('firebase-admin');
 
 
@@ -13,13 +14,14 @@ async function getDefiPrices(key){
         const data = await scrap()
         let result;
         
-        for(let index = 0; index < data.length; index += 1){
-            const docKey =  [data[index].key,data[index].timestamp].join('_')
-            await saveDocument(docKey, data[index],'cryptos')
-            if(data[index].key === key){
-                result = data[index]
+        await async.eachLimit(data, 10, async(record) => {
+            const docKey = [record.key,record.timestamp].join('_')
+            await saveDocument(docKey, record,'cryptos')
+
+            if(record.key === key){
+                result = record
             }
-        }
+        })
 
         if(result === undefined){
             return {msg: `Couldn't get price for key provided: ${key}`, code: 404};
@@ -36,11 +38,11 @@ async function getDefiPrices(key){
 async function getDefiRates(){
     try{
         const data = await scrapRates()
-        
-        for(let index = 0; index < data.length; index += 1){
-            const key = [data[index].providerName, data[index].timestamp].join('_') 
-            await saveDocument(key, data[index],'defiRates')
-        }
+
+        async.eachLimit(data, 10, async(record) => {
+            const key = [record.providerName, record.timestamp].join('_')
+            await saveDocument(key, record,'defiRates')
+        })
 
         return {data, code: 200};
     }catch(error){

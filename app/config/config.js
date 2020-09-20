@@ -18,10 +18,23 @@ const validTransactions = {
     'money-sent':'Envio de dinero.',
     'bank-transfer':'Depósito de dinero.',
     'payment':'Pago',
-    'investment':'Inversión'
+    'investment':'Inversión',
+    'withdraw-from-investment':'Retiro de inversión',
+    'withdraw': 'Retiro'
+}
+
+const substractFromBalance = {
+    'money-transfer': false,
+    'money-sent':   true,
+    'bank-transfer': false,
+    'payment': true,
+    'investment': true,
+    'withdraw-from-investment': false,
+    'withdraw': true
+
 }
 
 const sendNotificationTransaction = ['bank-transfer','money-transfer']
 
 
-module.exports = { googleKey, validTransactions, sendNotificationTransaction }
+module.exports = { googleKey, validTransactions, sendNotificationTransaction, substractFromBalance }

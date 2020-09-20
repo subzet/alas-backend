@@ -1,5 +1,5 @@
 const moment = require('moment')
-const { validTransactions, sendNotificationTransaction } = require('../config/config')
+const { validTransactions, sendNotificationTransaction, substractFromBalance } = require('../config/config')
 const { sendNotification, buildNotification } = require('./notificationController')
 const admin = require('firebase-admin');
  
@@ -7,7 +7,7 @@ const admin = require('firebase-admin');
 async function createTransaction(uid,body){
     let transaction = {}
     try{
-        transaction.timestamp = moment().format()
+        transaction.timestamp = admin.firestore.FieldValue.serverTimestamp()
         transaction.type = validateType(body.type)
         transaction.typeDesc = validTransactions[body.type]
         transaction.amountLC = body.amountLC
@@ -64,8 +64,14 @@ async function storeTransaction(uid, transaction){
     console.log('Creating transaction..')
     await batch.create(txRef,transaction)
 
-    balance.dai += transaction.amountDAI 
-    balance.lc += transaction.amountLC
+    if(substractFromBalance[transaction.type]){
+        balance.dai -= transaction.amountDAI 
+        balance.lc -= transaction.amountLC
+    }else{
+        balance.dai += transaction.amountDAI 
+        balance.lc += transaction.amountLC
+    }
+
     if(balance.dai < 0 || balance.lc < 0){
         throw Error('No tienes fondos suficientes en tu cuenta!')
     }
