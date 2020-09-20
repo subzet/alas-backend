@@ -50,6 +50,7 @@ const getRates = async(protocols) => {
 }
 
 const mergeRates = async() => {
+    //Takes de last 7 seven days of rates and merges it to a single rate.
     try{
         const beginningDate = Date.now() - 604800000; //7 DAYS
         const beginningDateObject = new Date(beginningDate);
@@ -64,25 +65,56 @@ const mergeRates = async() => {
 
         snapshot.forEach(snapshot => {
             let data = snapshot.data()
+
+            data.timestamp = moment(data.timestamp.toDate()).format()
+
             ratesData.push(data)
         })
 
-        const merged = ratesData.map(groupByDay)
+        let merged = {}
+        
+        ratesData.forEach(rate => {
+            const date = new Date(rate.timestamp).toISOString().slice(0,10);
+            const provider = rate.providerName
+            
+            if(merged[date] != undefined){
+                if(merged[date][provider] != undefined){
+                    merged[date][provider].averageRate.push(rate.actualInterest)
+                    merged[date][provider].timestamp = rate.timestamp
+                }else{
+                    merged[date][provider] = {}
+                    merged[date][provider].averageRate = []
+                    merged[date][provider].averageRate.push(rate.actualInterest)
+                    merged[date][provider].timestamp = rate.timestamp
+                }
+            }else{
+                merged[date] = {}
+                merged[date][provider] = {}
+                merged[date][provider].averageRate = []
+                merged[date][provider].averageRate.push(rate.actualInterest)
+                merged[date][provider].timestamp = rate.timestamp
+            }
+        })
+
+
+        Object.keys(merged).forEach(async (date) => {
+            Object.keys(merged[date]).forEach(async (provider) => {
+                let sum = merged[date][provider].averageRate.reduce((previous, current) => current += previous);
+                let avg = sum / merged[date][provider].averageRate.length;
+                merged[date][provider].averageRate = avg
+                merged[date][provider].provider = provider
+                merged[date][provider].lastrun = admin.firestore.FieldValue.serverTimestamp()
+                const key = [date,provider].join('-')
+                await admin.firestore().collection('ratesMerged').doc(key).set(merged[date][provider])
+            })
+        })
         
         return {merged, code:200}
     }catch(error){
         const msg = error.message 
-        return {msg, code}
+        return { msg, code:500 }
     }
 }
 
-const groupByDay = (value, index, array) => {
-    let byday={};
-     let d = new Date(value['date']);
-     d = Math.floor(d.getTime()/(1000*60*60*24));
-     byday[d]=byday[d]||[];
-     byday[d].push(value);
-   return byday
- }
  
 module.exports = { getInvestments, getRates, mergeRates }
