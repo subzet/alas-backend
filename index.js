@@ -86,7 +86,8 @@ app.get('/users/mainScreen',auth,(req,res) => {
 
 app.get('/users/investmentsScreen',auth,(req,res) => {
   //Get's user balance and transactions.
-  userController.getInvestmentScreenData(req.uid).then(
+  let preferedCurrency = req.query.currency ? req.query.currency : 'ARS'
+  userController.getInvestmentScreenData(req.uid, preferedCurrency).then(
     (response) => {
       res.status(response.code).send(response);
   }
@@ -96,7 +97,8 @@ app.get('/users/investmentsScreen',auth,(req,res) => {
 
 app.get('/users/investmentsScreen',auth,(req,res) => {
   //Get's user balance and transactions.
-  userController.getInvestmentScreenData(req.uid).then(
+  let preferedCurrency = req.query.currency ? req.query.currency : 'ARS'
+  userController.getInvestmentScreenData(req.uid, preferedCurrency).then(
     (response) => {
       res.status(response.code).send(response);
   }

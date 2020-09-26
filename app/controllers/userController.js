@@ -1,9 +1,10 @@
 const {getBalance, getTransactions} = require('./transactionController')
 const { getInvestments, getRates } = require('./investmentController')
+const { getDefiPrices } = require('./criptoController')
 const admin = require('firebase-admin');
 const async = require('async')
 
-async function getMainScreenData(uid){
+async function getMainScreenData(uid, preferedCurrency){
     try{
         let result = {}
         let balance = await getBalance(uid)
@@ -13,7 +14,7 @@ async function getMainScreenData(uid){
         result.username = userData.nickName
         result.balanceLC = balance.lc
         result.balanceDAI = balance.dai
-        result.userLC = 'ARS' //THIS HAS TO CHANGE BROO
+        result.userLC = preferedCurrency
         result.movements = transactions
 
         console.log(`Data for user ${uid} retrieved successfully`)
@@ -24,17 +25,19 @@ async function getMainScreenData(uid){
     }
 }
 
-async function getInvestmentScreenData(uid){
+async function getInvestmentScreenData(uid, preferedCurrency){
     try{
         let result = {}
         let investments = await getInvestments(uid)
         let protocols = [...new Set(investments.map(investment => investment.extra.protocol))]
         let rates = await getRates(protocols, investments[investments.length - 1].timestamp.toDate())
         let userData = (await admin.firestore().collection('users').doc(uid).get()).data()
+        //It's money already in DAI, shows sell box price.
+        let price = (await getDefiPrices('dai'+preferedCurrency.toLowerCase())).data.sell 
 
-        result.investmentProviders = await buildProvidersData(protocols, rates, investments)
+        result.investmentProviders = await buildProvidersData(protocols, rates, investments, price, preferedCurrency)
         result.username = userData.nickName
-        result.userLC = 'ARS' //THIS HAS TO CHANGE BROO
+        result.userLC = preferedCurrency
         result.balanceDAI = result.investmentProviders.reduce((sum, provider) => sum + (provider.balanceDAI || 0), 0)
     
         
@@ -45,7 +48,7 @@ async function getInvestmentScreenData(uid){
     }
 }
 
-const buildProvidersData = async (protocols, rates, investments) => {
+const buildProvidersData = async (protocols, rates, investments, price, preferedCurrency) => {
     providers = []
     protocols.forEach((protocol) => {
         let providersReturn = []
@@ -72,14 +75,20 @@ const buildProvidersData = async (protocols, rates, investments) => {
         })
 
         let balanceDAI = providersReturn[providersReturn.length - 1].finalBalance 
+        let balanceLC = balanceDAI * price
         let interestDAI = balanceDAI - totalMovements
+        let interestLC = interestDAI * price
+        let userLC = preferedCurrency
         let actualRate = providerRates[providerRates.length - 1].averageRate
         let sinceDate = moment(providerRates[0].timestamp.toDate()).format()
 
         providers.push({
             protocol,
             balanceDAI,
+            balanceLC,
             interestDAI,
+            interestLC,
+            userLC,
             actualRate,
             sinceDate
         })
