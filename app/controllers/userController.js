@@ -40,6 +40,7 @@ async function getInvestmentScreenData(uid, preferedCurrency){
         result.username = userData.nickName
         result.userLC = preferedCurrency
         result.balanceDAI = result.investmentProviders.reduce((sum, provider) => sum + (provider.balanceDAI || 0), 0)
+        result.balanceLC = result.balanceDAI * price
     
         
         return {result, code:200}
