@@ -77,6 +77,7 @@ app.post('/rates/merge', (req,res) =>{
 
 app.get('/users/mainScreen',auth,(req,res) => {
   //Get's user balance and transactions.
+  let preferedCurrency = req.query.currency ? req.query.currency : 'ARS'
   userController.getMainScreenData(req.uid).then(
     (response) => {
       res.status(response.code).send(response);
@@ -85,7 +86,7 @@ app.get('/users/mainScreen',auth,(req,res) => {
 });
 
 app.get('/users/investmentsScreen',auth,(req,res) => {
-  //Get's user balance and transactions.
+  //Get's user investments.
   let preferedCurrency = req.query.currency ? req.query.currency : 'ARS'
   userController.getInvestmentScreenData(req.uid, preferedCurrency).then(
     (response) => {
