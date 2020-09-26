@@ -35,12 +35,12 @@ const getInvestments = async (uid) => {
     return result
 } 
 
-const getRates = async(protocols, startDate) => {
-    const result = {}
+const getRates = async(protocols) => {
+    let result = {}
 
     await async.eachLimit(protocols, 10, async(protocol) => {
         const ratesData = []
-        const snapshot = (await admin.firestore().collection('ratesMerged').where('provider','==',protocol).where('timestamp', '>=', startDate).get())
+        const snapshot = (await admin.firestore().collection('ratesMerged').where('provider','==',protocol.protocol).where('timestamp', '>=', protocol.since.timestamp).get())
         
         if(snapshot.empty){
             return []
@@ -56,7 +56,7 @@ const getRates = async(protocols, startDate) => {
             return Date.parse(a.timestamp) - Date.parse(b.timestamp)
         })
 
-        result[protocol] = ratesData
+        result[protocol.protocol] = ratesData
     })
 
 
@@ -95,12 +95,14 @@ const mergeRates = async() => {
                     merged[date][provider].averageRate.push(rate.actualInterest)
                     let timestamp = new Date(rate.timestamp)
                     merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
+                    merged[date][provider].icon = rate.providerImg
                 }else{
                     merged[date][provider] = {}
                     merged[date][provider].averageRate = []
                     merged[date][provider].averageRate.push(rate.actualInterest)
                     let timestamp = new Date(rate.timestamp)
                     merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
+                    merged[date][provider].icon = rate.providerImg
                 }
             }else{
                 merged[date] = {}
@@ -109,6 +111,7 @@ const mergeRates = async() => {
                 merged[date][provider].averageRate.push(rate.actualInterest)
                 let timestamp = new Date(rate.timestamp)
                 merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
+                merged[date][provider].icon = rate.providerImg
             }
         })
 

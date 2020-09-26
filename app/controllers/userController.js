@@ -30,7 +30,8 @@ async function getInvestmentScreenData(uid, preferedCurrency){
         let result = {}
         let investments = await getInvestments(uid)
         let protocols = [...new Set(investments.map(investment => investment.extra.protocol))]
-        let rates = await getRates(protocols, investments[investments.length - 1].timestamp.toDate())
+        let protocolsFirstInvestment = protocols.map(protocol => {return {protocol, since: investments.filter(investment => investment.extra.protocol === protocol)[0]}})
+        let rates = await getRates(protocolsFirstInvestment)
         let userData = (await admin.firestore().collection('users').doc(uid).get()).data()
         //It's money already in DAI, shows sell box price.
         let price = (await getDefiPrices('dai'+preferedCurrency.toLowerCase())).data.sell 
@@ -61,7 +62,7 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
                 initialBalance = providersReturn[index - 1].finalBalance   
             }
                 let date = rate.timestamp.toDate()
-                let movements = getMovements(investments, date)
+                let movements = getMovements(protocol,investments, date)
                 totalMovements += movements
                 let dailyRate =  (Math.pow(((rate.averageRate/100) + 1),(1/365)) - 1) * 100
                 let finalBalance = (initialBalance + movements) * (1 + dailyRate)
@@ -70,7 +71,8 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
                         movements,
                         dailyRate,
                         finalBalance,
-                        date
+                        date,
+                        icon: rate.icon
                     })
         })
 
@@ -81,6 +83,7 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
         let userLC = preferedCurrency
         let actualRate = providerRates[providerRates.length - 1].averageRate
         let sinceDate = moment(providerRates[0].timestamp.toDate()).format()
+        let icon = providersReturn[providersReturn.length - 1].icon
 
         providers.push({
             protocol,
@@ -90,7 +93,8 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
             interestLC,
             userLC,
             actualRate,
-            sinceDate
+            sinceDate,
+            icon
         })
         
     });
@@ -99,16 +103,18 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
 }
 
 
-const getMovements = (investmentArray, date) => {
+const getMovements = (protocol, investmentArray, date) => {
     const movementType = ['investment','withdraw-from-investment']
     let result = 0
 
     investmentArray.forEach(investment => {
-        if(datesAreOnSameDay(investment.timestamp.toDate(), date)){
-            if(movementType.indexOf(investment.type) == 0){
-                result += investment.amountDAI
-            }else{
-                result -= investment.amountDAI
+        if(investment.extra.protocol === protocol){
+            if(datesAreOnSameDay(investment.timestamp.toDate(), date)){
+                if(movementType.indexOf(investment.type) == 0){
+                    result += investment.amountDAI
+                }else{
+                    result -= investment.amountDAI
+                }
             }
         }
     })
