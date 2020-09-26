@@ -5,28 +5,42 @@ const async = require('async');
 const getInvestments = async (uid) => {
     console.log('Retrieving investments...')
     let result = []
-    let snapshot = (await admin.firestore().collection('transactions').where('uid','==',uid).where('type','==','investment').get())
+    let snapshotInvestments = (await admin.firestore().collection('transactions').where('uid','==',uid).where('type','==','investment').get())
+    let snapshotWithdrawals = (await admin.firestore().collection('transactions').where('uid','==',uid).where('type','==','withdraw-from-investment').get())
 
-    if(snapshot.empty){
+    if(snapshotInvestments.empty && snapshotWithdrawals.empty){
         return []
     }
 
-    snapshot.forEach(snapshot => {
+    snapshotInvestments.forEach(snapshot => {
         let data = snapshot.data()
+        delete data['uid']
+        data.dateOrder =  moment(data.timestamp.toDate()).format()
+        result.push(data)
+    })
+
+    snapshotWithdrawals.forEach(snapshot => {
+        let data = snapshot.data()
+        data.dateOrder =  moment(data.timestamp.toDate()).format()
         delete data['uid']
         result.push(data)
     })
 
+    //Order by date.
+    result.sort((a,b) => {
+        return Date.parse(a.dateOrder) - Date.parse(b.dateOrder)
+    })
+    
 
     return result
 } 
 
-const getRates = async(protocols) => {
+const getRates = async(protocols, startDate) => {
     const result = {}
 
     await async.eachLimit(protocols, 10, async(protocol) => {
         const ratesData = []
-        const snapshot = (await admin.firestore().collection('defiRates').where('providerName','==',protocol).get())
+        const snapshot = (await admin.firestore().collection('ratesMerged').where('provider','==',protocol).where('timestamp', '>=', startDate).get())
         
         if(snapshot.empty){
             return []
@@ -65,11 +79,10 @@ const mergeRates = async() => {
 
         snapshot.forEach(snapshot => {
             let data = snapshot.data()
-
             data.timestamp = moment(data.timestamp.toDate()).format()
-
             ratesData.push(data)
         })
+
 
         let merged = {}
         
@@ -80,19 +93,22 @@ const mergeRates = async() => {
             if(merged[date] != undefined){
                 if(merged[date][provider] != undefined){
                     merged[date][provider].averageRate.push(rate.actualInterest)
-                    merged[date][provider].timestamp = rate.timestamp
+                    let timestamp = new Date(rate.timestamp)
+                    merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
                 }else{
                     merged[date][provider] = {}
                     merged[date][provider].averageRate = []
                     merged[date][provider].averageRate.push(rate.actualInterest)
-                    merged[date][provider].timestamp = rate.timestamp
+                    let timestamp = new Date(rate.timestamp)
+                    merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
                 }
             }else{
                 merged[date] = {}
                 merged[date][provider] = {}
                 merged[date][provider].averageRate = []
                 merged[date][provider].averageRate.push(rate.actualInterest)
-                merged[date][provider].timestamp = rate.timestamp
+                let timestamp = new Date(rate.timestamp)
+                merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
             }
         })
 
