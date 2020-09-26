@@ -78,7 +78,7 @@ app.post('/rates/merge', (req,res) =>{
 app.get('/users/mainScreen',auth,(req,res) => {
   //Get's user balance and transactions.
   let preferedCurrency = req.query.currency ? req.query.currency : 'ARS'
-  userController.getMainScreenData(req.uid).then(
+  userController.getMainScreenData(req.uid, preferedCurrency).then(
     (response) => {
       res.status(response.code).send(response);
   }
