@@ -40,7 +40,7 @@ const getRates = async(protocols) => {
 
     await async.eachLimit(protocols, 10, async(protocol) => {
         const ratesData = []
-        const snapshot = (await admin.firestore().collection('ratesMerged').where('provider','==',protocol.protocol).where('timestamp', '>=', protocol.since.timestamp).get())
+        const snapshot = (await admin.firestore().collection('ratesMerged').where('provider','==',protocol.protocol).where('timestamp', '>=', protocol.investments[0].timestamp).get())
         
         if(snapshot.empty){
             return []
@@ -79,55 +79,45 @@ const mergeRates = async() => {
 
         snapshot.forEach(snapshot => {
             let data = snapshot.data()
-            data.timestamp = moment(data.timestamp.toDate()).format()
+            data.timestamp = data.timestamp.toDate()
             ratesData.push(data)
         })
 
 
-        let merged = {}
-        
-        ratesData.forEach(rate => {
-            const date = new Date(rate.timestamp).toISOString().slice(0,10);
-            const provider = rate.providerName
-            
-            if(merged[date] != undefined){
-                if(merged[date][provider] != undefined){
-                    merged[date][provider].averageRate.push(rate.actualInterest)
-                    let timestamp = new Date(rate.timestamp)
-                    merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
-                    merged[date][provider].icon = rate.providerImg
+        const dates = [...new Set(ratesData.map(rate => rate.timestamp.toISOString().slice(0,10) + ' 00:00'))]
+        const providers = [...new Set(ratesData.map(rate => rate.providerName))]
+
+        const merged = {}
+
+        dates.forEach(async (date) => {
+            providers.forEach(async (provider) => {
+                const rates = ratesData.filter(rate => rate.providerName === provider && datesAreOnSameDay(rate.timestamp,new Date(date)))
+                const avgRate = rates.reduce((total, rate) => total + (rate.actualInterest || 0), 0) / rates.length;
+                const timestamp = admin.firestore.Timestamp.fromDate(rates[rates.length - 1].timestamp)
+                const icon = rates[rates.length - 1].providerImg  
+                const lastrun = admin.firestore.FieldValue.serverTimestamp()
+
+                const mergedRate = {
+                    averageRate: avgRate,
+                    provider,
+                    lastrun,
+                    icon,
+                    timestamp
+                } 
+
+                if(merged[date.split(' ')[0]]){
+                    merged[date.split(' ')[0]][provider] = mergedRate
+
                 }else{
-                    merged[date][provider] = {}
-                    merged[date][provider].averageRate = []
-                    merged[date][provider].averageRate.push(rate.actualInterest)
-                    let timestamp = new Date(rate.timestamp)
-                    merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
-                    merged[date][provider].icon = rate.providerImg
+                    merged[date.split(' ')[0]] = {}
+                    merged[date.split(' ')[0]][provider] = mergedRate
                 }
-            }else{
-                merged[date] = {}
-                merged[date][provider] = {}
-                merged[date][provider].averageRate = []
-                merged[date][provider].averageRate.push(rate.actualInterest)
-                let timestamp = new Date(rate.timestamp)
-                merged[date][provider].timestamp = admin.firestore.Timestamp.fromDate(timestamp)
-                merged[date][provider].icon = rate.providerImg
-            }
-        })
+                
+                const key = date.split(' ')[0] + "-" + provider
+                await admin.firestore().collection('ratesMerged').doc(key).set(mergedRate)
+            });
+        });
 
-
-        Object.keys(merged).forEach(async (date) => {
-            Object.keys(merged[date]).forEach(async (provider) => {
-                let sum = merged[date][provider].averageRate.reduce((previous, current) => current += previous);
-                let avg = sum / merged[date][provider].averageRate.length;
-                merged[date][provider].averageRate = avg
-                merged[date][provider].provider = provider
-                merged[date][provider].lastrun = admin.firestore.FieldValue.serverTimestamp()
-                const key = [date,provider].join('-')
-                await admin.firestore().collection('ratesMerged').doc(key).set(merged[date][provider])
-            })
-        })
-        
         return {merged, code:200}
     }catch(error){
         const msg = error.message 
@@ -135,5 +125,9 @@ const mergeRates = async() => {
     }
 }
 
+const datesAreOnSameDay = (first, second) =>
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate();
  
 module.exports = { getInvestments, getRates, mergeRates }

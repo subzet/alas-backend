@@ -1,6 +1,8 @@
 const moment = require('moment')
 const { validTransactions, sendNotificationTransaction, substractFromBalance } = require('../config/config')
 const { sendNotification, buildNotification } = require('./notificationController')
+const { getDefiRates } = require('./criptoController')
+const { mergeRates } = require('./investmentController')
 const admin = require('firebase-admin');
  
 
@@ -26,6 +28,8 @@ async function createTransaction(uid,body){
             )
             sendNotification(uid,notification)
         }
+
+        await transactionPostWork(transaction)
 
         console.log(`Succesfully created transaction for user: ${uid}.`)
         return ({msg:`Succesfully created transaction for user: ${uid}.`, code:200})
@@ -112,6 +116,14 @@ async function getTransactions(uid){
     })
 
     return result
+}
+
+async function transactionPostWork(trx) {
+    if(trx.type === 'investment'){
+        console.log("Finishing transaction..")
+            await getDefiRates()
+            await mergeRates()
+    }
 }
 
 

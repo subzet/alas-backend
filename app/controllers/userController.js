@@ -30,13 +30,13 @@ async function getInvestmentScreenData(uid, preferedCurrency){
         let result = {}
         let investments = await getInvestments(uid)
         let protocols = [...new Set(investments.map(investment => investment.extra.protocol))]
-        let protocolsFirstInvestment = protocols.map(protocol => {return {protocol, since: investments.filter(investment => investment.extra.protocol === protocol)[0]}})
-        let rates = await getRates(protocolsFirstInvestment)
+        let protocolInvestments = protocols.map(protocol => {return {protocol, investments: investments.filter(investment => investment.extra.protocol === protocol)}})
+        let rates = await getRates(protocolInvestments)
         let userData = (await admin.firestore().collection('users').doc(uid).get()).data()
         //It's money already in DAI, shows sell box price.
         let price = (await getDefiPrices('dai'+preferedCurrency.toLowerCase())).data.sell 
 
-        result.investmentProviders = await buildProvidersData(protocols, rates, investments, price, preferedCurrency)
+        result.investmentProviders = await buildProvidersData(protocols, rates, protocolInvestments, price, preferedCurrency)
         result.username = userData.nickName
         result.userLC = preferedCurrency
         result.balanceDAI = result.investmentProviders.reduce((sum, provider) => sum + (provider.balanceDAI || 0), 0)
@@ -63,7 +63,7 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
                 initialBalance = providersReturn[index - 1].finalBalance   
             }
                 let date = rate.timestamp.toDate()
-                let movements = getMovements(protocol,investments, date)
+                let movements = getMovements(investments.filter(investment => investment.protocol === protocol)[0].investments, date)
                 totalMovements += movements
                 let dailyRate =  (Math.pow(((rate.averageRate/100) + 1),(1/365)) - 1) * 100
                 let finalBalance = (initialBalance + movements) * (1 + dailyRate)
@@ -104,18 +104,16 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
 }
 
 
-const getMovements = (protocol, investmentArray, date) => {
+const getMovements = (investmentArray, date) => {
     const movementType = ['investment','withdraw-from-investment']
     let result = 0
 
     investmentArray.forEach(investment => {
-        if(investment.extra.protocol === protocol){
-            if(datesAreOnSameDay(investment.timestamp.toDate(), date)){
-                if(movementType.indexOf(investment.type) == 0){
+        if(datesAreOnSameDay(investment.timestamp.toDate(), date)){
+            if(movementType.indexOf(investment.type) == 0){
                     result += investment.amountDAI
-                }else{
+            }else{
                     result -= investment.amountDAI
-                }
             }
         }
     })
