@@ -100,6 +100,8 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
         
     });
 
+    providers.sort((a,b) => b.balanceLC - a.balanceLC)
+
     return providers
 }
 
@@ -126,26 +128,6 @@ const datesAreOnSameDay = (first, second) =>
     first.getMonth() === second.getMonth() &&
     first.getDate() === second.getDate();
 
-
-let mock = {
-    username: 'mponsa',
-    balanceLC: 1300.12,
-    balanceDAI: 10.076524,
-    userLC: 'ARS',
-    investmentProviders:[
-        {
-            protocol: 'compound',
-            actualRate: 0.0682,
-            balanceLC: 1300,
-            balanceDAI: 10.076524,
-            interestLC: 3,
-            interestDAI: 0.034,
-            sinceDate: '2020-07-23T02:38:55+00:00',
-            userLC: 'ARS'
-        }
-    ] 
-
-}
 
 exports.getMainScreenData = getMainScreenData;
 exports.getInvestmentScreenData = getInvestmentScreenData;

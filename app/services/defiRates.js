@@ -35,6 +35,8 @@ async function scrapRates(){
         }                                                                                                                                                                    
     }
 
+    providers.sort((a,b) => b.actualInterest - a.actualInterest)
+
     return providers
 }
 
