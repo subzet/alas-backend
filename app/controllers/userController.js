@@ -2,7 +2,6 @@ const {getBalance, getTransactions} = require('./transactionController')
 const { getInvestments, getRates } = require('./investmentController')
 const { getDefiPrices } = require('./criptoController')
 const admin = require('firebase-admin');
-const async = require('async')
 
 async function getMainScreenData(uid, preferedCurrency){
     try{
