@@ -8,9 +8,13 @@ const DEFI_HTML_TABLE_ROWS = '#table-results > tbody > tr'
       
 
 async function getData(){
-    const response = await axios.get(url)
-    if(response.status == 200){
-        return response.data
+    try{
+        const response = await axios.get(url)
+        if(response.status == 200){
+            return response.data
+        }
+    }catch(error){
+        console.log(`Error while getting results from DEFIRATE.com: ${error.message}`)
     }
 }
 
