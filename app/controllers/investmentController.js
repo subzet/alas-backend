@@ -74,7 +74,7 @@ const mergeRates = async() => {
 
 
         if(snapshot.empty){
-            return []
+            return {data:[], code:200}
         }
 
         snapshot.forEach(snapshot => {
