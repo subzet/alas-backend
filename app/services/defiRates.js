@@ -15,6 +15,7 @@ async function getData(){
         }
     }catch(error){
         console.log(`Error while getting results from DEFIRATE.com: ${error.message}`)
+        throw error
     }
 }
 
