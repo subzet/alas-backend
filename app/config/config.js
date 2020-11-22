@@ -34,7 +34,18 @@ const substractFromBalance = {
 
 }
 
+const providersImagesUri = {
+    'fulcrum':'https://defirate.com/wp-content/uploads/2019/11/fulcrum_logo.png',
+    'dydx':'https://defirate.com/wp-content/uploads/2019/09/dydx.png',
+    'aave':'https://defirate.com/wp-content/uploads/2020/01/Aave-Ghost-Horizontal.png',
+    'nuo':'https://defirate.com/wp-content/uploads/2019/09/nuo.png',
+    'compound v2':'https://defirate.com/wp-content/uploads/2019/09/compound.svg',
+    'coinlist':'https://defirate.com/wp-content/uploads/2020/04/coinlist-trans.png',
+    'coinbase':'https://defirate.com/wp-content/uploads/2019/09/coinbase.png',
+    'bitfinex':'https://defirate.com/wp-content/uploads/2019/09/bitfinex.png'
+}
+
 const sendNotificationTransaction = ['bank-transfer','money-transfer']
 
 
-module.exports = { googleKey, validTransactions, sendNotificationTransaction, substractFromBalance }
+module.exports = { googleKey, validTransactions, sendNotificationTransaction, substractFromBalance,providersImagesUri }

@@ -1,5 +1,5 @@
 const { scrap } = require('../services/cryptoPrices.js')
-const { scrapRates } = require('../services/defiRates.js')
+const { scrapRates } = require('../services/loanscan.js')
 const async = require('async')
 const admin = require('firebase-admin');
 

@@ -1,4 +1,5 @@
 const cheerio = require('cheerio'),
+      rax = require('retry-axios'),
       axios = require('axios'),
       url = `https://defirate.com/dai/`
       moment = require('moment'),
@@ -9,6 +10,7 @@ const DEFI_HTML_TABLE_ROWS = '#table-results > tbody > tr'
 
 async function getData(){
     try{
+        const interceptorId = rax.attach();
         const response = await axios.get(url)
         if(response.status == 200){
             return response.data
