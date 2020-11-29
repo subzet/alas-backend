@@ -34,7 +34,7 @@ async function scrapRates(){
                 const result = {
                     providerName,
                     providerImg: await getProviderImg(providerName),
-                    actualInterest: daiRate.rate,
+                    actualInterest: daiRate.rate * 100,
                     avgInterest: null,
                     timestamp: admin.firestore.FieldValue.serverTimestamp()
                 }
