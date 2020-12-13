@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 
 
 async function assignWalletToUser(uid){
-    let wallet = ''
+    let wallet = '0x5371967BEC1dBD022BFa22E4ec867577c0B6CA2C'
     try{
         await admin.firestore().collection('wallets').doc(uid).set({wallet})
         console.log(`Wallet created successfully for user: ${uid}`)
