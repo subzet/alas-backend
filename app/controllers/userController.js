@@ -1,6 +1,6 @@
 const {getBalance, getTransactions} = require('./transactionController')
 const { getInvestments, getRates } = require('./investmentController')
-const { getDefiPrices } = require('./criptoController')
+const { getDefiPrices,getDefiRates } = require('./criptoController')
 const admin = require('firebase-admin');
 const async = require('async')
 
@@ -34,9 +34,10 @@ async function getInvestmentScreenData(uid, preferedCurrency){
         let rates = await getRates(protocolInvestments)
         let userData = (await admin.firestore().collection('users').doc(uid).get()).data()
         //It's money already in DAI, shows sell box price.
-        let price = (await getDefiPrices('dai'+preferedCurrency.toLowerCase())).data.sell 
+        let price = (await getDefiPrices('dai'+preferedCurrency.toLowerCase())).data.sell
+        let actualRates = await getDefiRates();
 
-        result.investmentProviders = await buildProvidersData(protocols, rates, protocolInvestments, price, preferedCurrency)
+        result.investmentProviders = await buildProvidersData(protocols, rates, protocolInvestments, price, preferedCurrency, actualRates)
         result.username = userData.nickName
         result.userLC = preferedCurrency
         result.balanceDAI = result.investmentProviders.reduce((sum, provider) => sum + (provider.balanceDAI || 0), 0)
@@ -50,7 +51,7 @@ async function getInvestmentScreenData(uid, preferedCurrency){
     }
 }
 
-const buildProvidersData = async (protocols, rates, investments, price, preferedCurrency) => {
+const buildProvidersData = async (protocols, rates, investments, price, preferedCurrency, actualRates) => {
     providers = []
     protocols.forEach((protocol) => {
         let providersReturn = []
@@ -82,6 +83,8 @@ const buildProvidersData = async (protocols, rates, investments, price, prefered
         let interestDAI = balanceDAI - totalMovements
         let interestLC = interestDAI * price
         let userLC = preferedCurrency
+        
+
         let actualRate = providerRates[providerRates.length - 1].averageRate
         let sinceDate = moment(providerRates[0].timestamp.toDate()).format()
         let icon = providersReturn[providersReturn.length - 1].icon
