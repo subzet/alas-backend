@@ -1,7 +1,7 @@
 const moment = require('moment')
 const { validTransactions, sendNotificationTransaction, substractFromBalance } = require('../config/config')
 const { sendNotification, buildNotification } = require('./notificationController')
-const { getDefiRates } = require('./criptoController')
+const { getDefiRates, getDefiPrices } = require('./criptoController')
 const { mergeRates } = require('./investmentController')
 const admin = require('firebase-admin');
  
@@ -13,7 +13,7 @@ async function createTransaction(uid,body){
         transaction.type = validateType(body.type)
         transaction.typeDesc = validTransactions[body.type]
         transaction.amountLC = body.amountLC
-        transaction.amountDAI = body.amountDAI
+        transaction.amountDAI = await getDaiAmount(body)
         transaction.userLC = body.userLC
         transaction.extra = body.extra
         transaction.uid = uid
@@ -124,6 +124,15 @@ async function transactionPostWork(trx) {
             await getDefiRates()
             await mergeRates()
     }
+}
+
+async function getDaiAmount(body){
+    if(body.type === 'bank-transfer'){
+        const priceData = (await getDefiPrices('dai'+body.userLC.toLocaleLowerCase())).data
+        return body.amountLC / Number(priceData.buy)
+    }
+
+    return body.amountDAI
 }
 
 
